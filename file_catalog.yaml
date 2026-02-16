@@ -1,0 +1,341 @@
+# =============================================================================
+# File Catalog - Registry of all filterable datasets in the production run
+# =============================================================================
+# To add a new filterable dataset, add an entry below. No code changes needed.
+#
+# Fields:
+#   id:                  Unique identifier (used in API and UI)
+#   display_name:        Human-readable name shown in the shopping cart UI
+#   description:         Brief summary of what this file contains
+#   category:            Grouping for UI display (forecasting, tuning, model_selection, impact, other)
+#   filename_pattern:    Regex pattern to locate the file within prod_run directory
+#   filter_columns:      Columns in the file used for part-key filtering
+#   filter_strategy:     How filtering is applied (model_part_id | part_orp_separated | impact | ch013 | remove_duplicates)
+#   key_mode:            What keys are required (part_orp | only_part_number | none)
+#   date_filterable:     Whether date filtering is supported for this file
+#   date_column:         Column name containing date values (if date_filterable)
+#   date_format:         Format hint for dates (yyyymm integer expected)
+# =============================================================================
+
+datasets:
+
+  # ---------------------------------------------------------------------------
+  # FORECASTING
+  # ---------------------------------------------------------------------------
+  - id: "forecasting-annualized-forecasts"
+    display_name: "Forecasting - Annualized Forecasts"
+    description: "Annualized forecast values from the forecasting module. Contains model_part_id as the composite key (plant_code + part_number + orp_code)."
+    category: "forecasting"
+    filename_pattern: "forecasting-annualized-forecasts"
+    filter_columns: ["model_part_id"]
+    filter_strategy: "model_part_id"
+    key_mode: "part_orp"
+    date_filterable: true
+    date_column: "year_month"
+    date_format: "yyyymm"
+
+  - id: "forecasting-forecasts"
+    display_name: "Forecasting - Forecasts"
+    description: "Monthly forecast output from the forecasting module. Uses model_part_id composite key."
+    category: "forecasting"
+    filename_pattern: "forecasting-forecasts"
+    filter_columns: ["model_part_id"]
+    filter_strategy: "model_part_id"
+    key_mode: "part_orp"
+    date_filterable: true
+    date_column: "year_month"
+    date_format: "yyyymm"
+
+  - id: "forecasting-element_models_metadata"
+    display_name: "Forecasting - Element Models Metadata"
+    description: "Metadata about the element-level models used in the forecasting step."
+    category: "forecasting"
+    filename_pattern: "forecasting-element_models_metadata"
+    filter_columns: ["model_part_id"]
+    filter_strategy: "model_part_id"
+    key_mode: "part_orp"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  # ---------------------------------------------------------------------------
+  # MODEL SELECTION
+  # ---------------------------------------------------------------------------
+  - id: "model_selection-annualized-forecasts"
+    display_name: "Model Selection - Annualized Forecasts"
+    description: "Annualized forecasts from the model selection step."
+    category: "model_selection"
+    filename_pattern: "model_selection-annualized-forecasts"
+    filter_columns: ["model_part_id"]
+    filter_strategy: "model_part_id"
+    key_mode: "part_orp"
+    date_filterable: true
+    date_column: "year_month"
+    date_format: "yyyymm"
+
+  - id: "model_selection-element_models_metadata"
+    display_name: "Model Selection - Element Models Metadata"
+    description: "Metadata about models evaluated during model selection."
+    category: "model_selection"
+    filename_pattern: "model_selection-element_models_metadata"
+    filter_columns: ["model_part_id"]
+    filter_strategy: "model_part_id"
+    key_mode: "part_orp"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  - id: "model_selection-forecasts"
+    display_name: "Model Selection - Forecasts"
+    description: "Forecast output from model selection. Part number and ORP code in separate columns."
+    category: "model_selection"
+    filename_pattern: "model_selection-forecasts"
+    filter_columns: ["part_number", "orp_code"]
+    filter_strategy: "part_orp_separated"
+    key_mode: "part_orp"
+    date_filterable: true
+    date_column: "year_month"
+    date_format: "yyyymm"
+
+  # ---------------------------------------------------------------------------
+  # TUNING
+  # ---------------------------------------------------------------------------
+  - id: "tuning-annualized-forecasts"
+    display_name: "Tuning - Annualized Forecasts"
+    description: "Annualized forecasts from the tuning module."
+    category: "tuning"
+    filename_pattern: "tuning-annualized-forecasts"
+    filter_columns: ["model_part_id"]
+    filter_strategy: "model_part_id"
+    key_mode: "part_orp"
+    date_filterable: true
+    date_column: "year_month"
+    date_format: "yyyymm"
+
+  - id: "tuning-element_models_metadata"
+    display_name: "Tuning - Element Models Metadata"
+    description: "Metadata about element models from the tuning step."
+    category: "tuning"
+    filename_pattern: "tuning-element_models_metadata"
+    filter_columns: ["model_part_id"]
+    filter_strategy: "model_part_id"
+    key_mode: "part_orp"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  - id: "tuning-forecasts"
+    display_name: "Tuning - Forecasts"
+    description: "Forecast output from the tuning module."
+    category: "tuning"
+    filename_pattern: "tuning-forecasts"
+    filter_columns: ["model_part_id"]
+    filter_strategy: "model_part_id"
+    key_mode: "part_orp"
+    date_filterable: true
+    date_column: "year_month"
+    date_format: "yyyymm"
+
+  # ---------------------------------------------------------------------------
+  # MODEL INPUTS
+  # ---------------------------------------------------------------------------
+  - id: "model_input_forecasting"
+    display_name: "Model Input - Forecasting"
+    description: "Raw input data fed into the forecasting models. Contains part_number and orp_code in separate columns."
+    category: "model_input"
+    filename_pattern: "model_input_forecasting"
+    filter_columns: ["part_number", "orp_code"]
+    filter_strategy: "part_orp_separated"
+    key_mode: "part_orp"
+    date_filterable: true
+    date_column: "year_month"
+    date_format: "yyyymm"
+
+  - id: "model_input_tuning"
+    display_name: "Model Input - Tuning"
+    description: "Raw input data fed into the tuning models."
+    category: "model_input"
+    filename_pattern: "model_input_tuning"
+    filter_columns: ["part_number", "orp_code"]
+    filter_strategy: "part_orp_separated"
+    key_mode: "part_orp"
+    date_filterable: true
+    date_column: "year_month"
+    date_format: "yyyymm"
+
+  # ---------------------------------------------------------------------------
+  # PROCESSED INPUTS
+  # ---------------------------------------------------------------------------
+  - id: "processed_input_file_forecast"
+    display_name: "Processed Input - Forecast"
+    description: "Processed and cleaned input data for forecast models."
+    category: "processed_input"
+    filename_pattern: "processed_input_file_forecast"
+    filter_columns: ["part_number", "orp_code"]
+    filter_strategy: "part_orp_separated"
+    key_mode: "part_orp"
+    date_filterable: true
+    date_column: "year_month"
+    date_format: "yyyymm"
+
+  - id: "processed_input_file_tuning"
+    display_name: "Processed Input - Tuning"
+    description: "Processed and cleaned input data for tuning models."
+    category: "processed_input"
+    filename_pattern: "processed_input_file_tuning"
+    filter_columns: ["part_number", "orp_code"]
+    filter_strategy: "part_orp_separated"
+    key_mode: "part_orp"
+    date_filterable: true
+    date_column: "year_month"
+    date_format: "yyyymm"
+
+  - id: "processed_input_forecast_fill_metrics"
+    display_name: "Processed Input - Forecast Fill Metrics"
+    description: "Fill-rate metrics for the processed forecast input data."
+    category: "processed_input"
+    filename_pattern: "processed_input_forecast_fill_metrics"
+    filter_columns: ["part_number", "orp_code"]
+    filter_strategy: "part_orp_separated"
+    key_mode: "part_orp"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  - id: "processed_input_tuning_fill_metrics"
+    display_name: "Processed Input - Tuning Fill Metrics"
+    description: "Fill-rate metrics for the processed tuning input data."
+    category: "processed_input"
+    filename_pattern: "processed_input_tuning_fill_metrics"
+    filter_columns: ["part_number", "orp_code"]
+    filter_strategy: "part_orp_separated"
+    key_mode: "part_orp"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  # ---------------------------------------------------------------------------
+  # IMPACT DATA
+  # ---------------------------------------------------------------------------
+  - id: "IMPACT_ACTIVE_RECEIVER"
+    display_name: "IMPACT - Active Receiver"
+    description: "Active receiver records from the IMPACT system. Filtered by part_number_opod."
+    category: "impact"
+    filename_pattern: "IMPACT_ACTIVE_RECEIVER"
+    filter_columns: ["part_number_opod"]
+    filter_strategy: "impact"
+    key_mode: "only_part_number"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  - id: "IMPACT_HISTORY_PA"
+    display_name: "IMPACT - History PA"
+    description: "Historical PA records from IMPACT. Filtered by part_number_hisi."
+    category: "impact"
+    filename_pattern: "IMPACT_HISTORY_PA"
+    filter_columns: ["part_number_hisi"]
+    filter_strategy: "impact"
+    key_mode: "only_part_number"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  - id: "IMPACT_HISTORY_PO"
+    display_name: "IMPACT - History PO"
+    description: "Historical PO records from IMPACT. Filtered by part_number_hisi."
+    category: "impact"
+    filename_pattern: "IMPACT_HISTORY_PO"
+    filter_columns: ["part_number_hisi"]
+    filter_strategy: "impact"
+    key_mode: "only_part_number"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  - id: "IMPACT_HISTORY_RECEIVER"
+    display_name: "IMPACT - History Receiver"
+    description: "Historical receiver records from IMPACT. Filtered by part_number_hisd."
+    category: "impact"
+    filename_pattern: "IMPACT_HISTORY_RECEIVER"
+    filter_columns: ["part_number_hisd"]
+    filter_strategy: "impact"
+    key_mode: "only_part_number"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  - id: "IMPACT_ACTIVE_PA"
+    display_name: "IMPACT - Active PA"
+    description: "Active PA records from IMPACT. Filtered by part_number_opoi."
+    category: "impact"
+    filename_pattern: "IMPACT_ACTIVE_PA"
+    filter_columns: ["part_number_opoi"]
+    filter_strategy: "impact"
+    key_mode: "only_part_number"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  - id: "IMPACT_ACTIVE_PO"
+    display_name: "IMPACT - Active PO"
+    description: "Active PO records from IMPACT. Filtered by part_number_opoi."
+    category: "impact"
+    filename_pattern: "IMPACT_ACTIVE_PO"
+    filter_columns: ["part_number_opoi"]
+    filter_strategy: "impact"
+    key_mode: "only_part_number"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  - id: "IMPACT_VENDOR_QUOTE"
+    display_name: "IMPACT - Vendor Quote"
+    description: "Vendor quote records from IMPACT. Filtered by part_number_opoi."
+    category: "impact"
+    filename_pattern: "IMPACT_VENDOR_QUOTE"
+    filter_columns: ["part_number_opoi"]
+    filter_strategy: "impact"
+    key_mode: "only_part_number"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  # ---------------------------------------------------------------------------
+  # OTHER
+  # ---------------------------------------------------------------------------
+  - id: "PPTS_VENDOR_QUOTE"
+    display_name: "PPTS - Vendor Quote"
+    description: "PPTS vendor quote data. Only deduplication is applied (no key filtering)."
+    category: "other"
+    filename_pattern: "PPTS_VENDOR_QUOTE"
+    filter_columns: null
+    filter_strategy: "remove_duplicates"
+    key_mode: "none"
+    date_filterable: false
+    date_column: null
+    date_format: null
+
+  - id: "CH013"
+    display_name: "CH013"
+    description: "CH013 cost data. Filtered by 'part number' and 'orp_cd' columns (note: different column names)."
+    category: "other"
+    filename_pattern: "CH013"
+    filter_columns: ["part number", "orp_cd"]
+    filter_strategy: "ch013"
+    key_mode: "part_orp"
+    date_filterable: true
+    date_column: "year_month"
+    date_format: "yyyymm"
+
+  - id: "RunModelfortheseparts"
+    display_name: "Run Model Parts List"
+    description: "List of parts designated for model execution."
+    category: "other"
+    filename_pattern: "RunModelfortheseparts"
+    filter_columns: ["part_number", "orp_code"]
+    filter_strategy: "part_orp_separated"
+    key_mode: "part_orp"
+    date_filterable: false
+    date_column: null
+    date_format: null

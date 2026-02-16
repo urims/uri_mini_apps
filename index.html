@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if errors %}
+<div class="alert alert--error" id="errorBanner">
+    <strong>Validation Errors:</strong>
+    <ul>{% for err in errors %}<li>{{ err }}</li>{% endfor %}</ul>
+    <button class="alert__close" onclick="this.parentElement.remove()">&times;</button>
+</div>
+{% endif %}
+
+<div class="layout">
+    <!-- LEFT PANEL: Upload + Catalog -->
+    <section class="panel">
+        <!-- Step 1 -->
+        <div class="card">
+            <h2 class="card__title"><span class="step-num">1</span> Upload Part List</h2>
+            <p class="card__desc">Upload a <code>.csv</code> or <code>.xlsx</code> with columns:
+                <strong>part_number + orp_code</strong>, or <strong>part_number</strong> only.</p>
+            <div class="upload-zone" id="uploadZone">
+                <input type="file" id="partsFileInput" accept=".csv,.xlsx,.xls" hidden>
+                <div class="upload-zone__content" id="uploadContent">
+                    <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span>Drop file here or <strong>click to browse</strong></span>
+                    <span class="upload-zone__hint">Max {{ settings.MAX_UPLOAD_SIZE_MB }}MB</span>
+                </div>
+                <div class="upload-zone__result" id="uploadResult" hidden>
+                    <div class="upload-zone__file" id="uploadFileName"></div>
+                    <div class="upload-zone__meta" id="uploadMeta"></div>
+                    <button class="btn btn--sm btn--outline" id="uploadClear" type="button">Change file</button>
+                </div>
+            </div>
+            <div id="validationErrors" class="alert alert--error" hidden></div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="card">
+            <h2 class="card__title"><span class="step-num">2</span> Select Datasets</h2>
+            <p class="card__desc">Check the files you need. Toggle date filtering where available.</p>
+            {% if catalog %}
+            {% for category in catalog.categories %}
+            <div class="category">
+                <h3 class="category__title">{{ category | replace('_', ' ') | title }}</h3>
+                <div class="dataset-list">
+                    {% for ds in catalog.datasets if ds.category == category %}
+                    <div class="dataset-item" data-id="{{ ds.id }}" data-key-mode="{{ ds.key_mode.value }}" data-date-filterable="{{ ds.date_filterable | lower }}">
+                        <div class="dataset-item__header">
+                            <label class="dataset-item__check">
+                                <input type="checkbox" class="ds-checkbox" value="{{ ds.id }}">
+                                <span class="dataset-item__name">{{ ds.display_name }}</span>
+                            </label>
+                            <div class="dataset-item__badges">
+                                <span class="badge badge--key">{{ ds.key_mode.value | replace('_',' ') }}</span>
+                                {% if ds.date_filterable %}
+                                <span class="badge badge--date">&#x1F4C5; Date</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <p class="dataset-item__desc">{{ ds.description }}</p>
+                        {% if ds.date_filterable %}
+                        <div class="date-filter-panel" hidden>
+                            <label class="toggle">
+                                <input type="checkbox" class="date-toggle" data-ds="{{ ds.id }}">
+                                <span class="toggle__label">Apply date filter</span>
+                            </label>
+                            <div class="date-filter-panel__fields" hidden>
+                                <div class="field-row">
+                                    <div class="field-group">
+                                        <label>Start (YYYYMM)</label>
+                                        <input type="number" class="input date-start" data-ds="{{ ds.id }}" placeholder="202101" min="190001" max="209912">
+                                    </div>
+                                    <div class="field-group">
+                                        <label>End (YYYYMM)</label>
+                                        <input type="number" class="input date-end" data-ds="{{ ds.id }}" placeholder="202512" min="190001" max="209912">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="alert alert--warning">Catalog not available. Check server configuration.</div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- RIGHT PANEL: Cart Summary -->
+    <aside class="sidebar">
+        <div class="card card--sticky">
+            <h2 class="card__title"><span class="step-num">3</span> Request Summary</h2>
+
+            <div id="cartEmpty" class="cart-empty">
+                <p>No datasets selected yet. Check items from the catalog on the left.</p>
+            </div>
+
+            <div id="cartContent" hidden>
+                <div class="cart-section">
+                    <h4>Uploaded File</h4>
+                    <div id="cartFileInfo" class="cart-info">—</div>
+                </div>
+                <div class="cart-section">
+                    <h4>Selected Datasets (<span id="cartCount">0</span>)</h4>
+                    <ul id="cartList" class="cart-list"></ul>
+                </div>
+                <div class="cart-section" id="cartDateSection" hidden>
+                    <h4>Date Filters</h4>
+                    <ul id="cartDateList" class="cart-list cart-list--dates"></ul>
+                </div>
+            </div>
+
+            <div class="cart-actions">
+                <button class="btn btn--primary btn--block" id="submitBtn" disabled>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Filter &amp; Download ZIP
+                </button>
+                <div id="submitProgress" class="progress" hidden>
+                    <div class="progress__bar"></div>
+                    <span class="progress__text">Processing...</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/app.js"></script>
+{% endblock %}

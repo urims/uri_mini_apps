@@ -1,0 +1,51 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Data Filtering Platform - Docker Compose
+# ═══════════════════════════════════════════════════════════════════════
+# Usage:
+#   docker compose up -d --build       # Start
+#   docker compose logs -f             # View logs
+#   docker compose down                # Stop
+#   docker compose restart             # Restart after config change
+# ═══════════════════════════════════════════════════════════════════════
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dfp-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:8000"
+    volumes:
+      # Mount the data directory (your external disk with prod_run folders)
+      - ${DATA_ROOT:-/data}:/data:ro
+      # Temp directory for generated ZIP files
+      - dfp-temp:/tmp/dfp
+    environment:
+      - APP_NAME=${APP_NAME:-Data Filtering Platform}
+      - DEBUG=${DEBUG:-false}
+      - DATA_ROOT=/data
+      - ACTIVE_PROD_RUN=${ACTIVE_PROD_RUN:-prod_run_latest}
+      - MAX_UPLOAD_SIZE_MB=${MAX_UPLOAD_SIZE_MB:-50}
+      - MAX_DELIVERY_SIZE_MB=${MAX_DELIVERY_SIZE_MB:-1024}
+      - ZIP_COMPRESSION_LEVEL=${ZIP_COMPRESSION_LEVEL:-6}
+      - WORKERS=${WORKERS:-2}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "3"
+          memory: 12G
+        reservations:
+          cpus: "1"
+          memory: 2G
+
+volumes:
+  dfp-temp:
+    driver: local
