@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weighted Average Results – Interpretation Guide</title>
+<style>
+  :root {
+    --navy: #0B1D3A;
+    --deep-blue: #065A82;
+    --teal: #1C7293;
+    --mint: #21B6A8;
+    --light-bg: #F4F7FA;
+    --card-bg: #FFFFFF;
+    --dark-text: #1A1A2E;
+    --muted: #5A6A7E;
+    --green: #27AE60;
+    --red: #E74C3C;
+    --amber: #F39C12;
+    --light-teal: #E8F6F3;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--light-bg); color: var(--dark-text); line-height: 1.6; }
+  .header { background: var(--navy); color: white; padding: 2rem 2rem 1.5rem; border-bottom: 4px solid var(--mint); }
+  .header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .header p { color: #B0C4DE; font-size: 0.95rem; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+  
+  .section { margin-bottom: 1.5rem; }
+  .section-title { font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--teal); }
+  
+  .card { background: var(--card-bg); border-radius: 8px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .card h3 { font-size: 1rem; color: var(--deep-blue); margin-bottom: 0.5rem; }
+  .card p, .card li { font-size: 0.9rem; color: var(--dark-text); }
+  .card ul { padding-left: 1.2rem; }
+  .card li { margin-bottom: 0.3rem; }
+  
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+  .badge-green { background: #E8F8F0; color: var(--green); }
+  .badge-amber { background: #FEF5E7; color: var(--amber); }
+  .badge-red { background: #FDEDEC; color: var(--red); }
+  .badge-blue { background: var(--light-teal); color: var(--teal); }
+  
+  .score-table { width: 100%; border-collapse: collapse; margin: 0.8rem 0; }
+  .score-table th { background: var(--deep-blue); color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
+  .score-table td { padding: 8px 12px; border-bottom: 1px solid #E5E7EB; font-size: 0.85rem; }
+  .score-table tr:nth-child(even) { background: #F9FAFB; }
+  
+  .flow-steps { display: flex; gap: 0.8rem; flex-wrap: wrap; margin: 0.8rem 0; }
+  .flow-step { flex: 1; min-width: 180px; background: var(--light-teal); border-radius: 8px; padding: 1rem; text-align: center; position: relative; }
+  .flow-step .num { display: inline-block; width: 28px; height: 28px; background: var(--teal); color: white; border-radius: 50%; line-height: 28px; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .flow-step h4 { font-size: 0.85rem; color: var(--navy); margin-bottom: 0.2rem; }
+  .flow-step p { font-size: 0.78rem; color: var(--muted); }
+  
+  .decision-tree { background: var(--card-bg); border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin: 1rem 0; }
+  .dt-node { padding: 0.6rem 1rem; margin: 0.4rem 0; border-left: 3px solid var(--teal); background: #F8FAFC; border-radius: 0 6px 6px 0; font-size: 0.88rem; }
+  .dt-node.green { border-left-color: var(--green); background: #F0FFF5; }
+  .dt-node.amber { border-left-color: var(--amber); background: #FFFDF0; }
+  .dt-node.red { border-left-color: var(--red); background: #FFF5F5; }
+  .dt-node strong { color: var(--navy); }
+  
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+  
+  .formula-box { background: var(--navy); color: #B0C4DE; padding: 1rem; border-radius: 6px; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9rem; margin: 0.6rem 0; }
+  .formula-box .highlight { color: var(--mint); font-weight: 700; }
+  
+  .tip-box { border-left: 3px solid var(--mint); background: var(--light-teal); padding: 0.8rem 1rem; border-radius: 0 6px 6px 0; margin: 0.8rem 0; }
+  .tip-box strong { color: var(--deep-blue); }
+  .tip-box p { font-size: 0.88rem; }
+  
+  .warn-box { border-left: 3px solid var(--amber); background: #FEF9E7; padding: 0.8rem 1rem; border-radius: 0 6px 6px 0; margin: 0.8rem 0; }
+  .warn-box strong { color: #B7791F; }
+  .warn-box p { font-size: 0.88rem; }
+  
+  .file-ref { display: inline-block; background: #EDF2F7; padding: 1px 8px; border-radius: 4px; font-family: monospace; font-size: 0.82rem; color: var(--deep-blue); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="max-width:1100px;margin:0 auto;">
+    <h1>Weighted Average Results – Interpretation & Decision Guide</h1>
+    <p>How to read the output files, interpret scores, and take data-driven procurement decisions</p>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- SECTION 1: Quick Reference -->
+<div class="section">
+  <h2 class="section-title">Quick Decision Workflow</h2>
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="num">1</div>
+      <h4>Open Statistics File</h4>
+      <p><span class="file-ref">wgt_avg_results_per_part</span></p>
+    </div>
+    <div class="flow-step">
+      <div class="num">2</div>
+      <h4>Filter by Part</h4>
+      <p>Select your part_number of interest</p>
+    </div>
+    <div class="flow-step">
+      <div class="num">3</div>
+      <h4>Find Rank = 1</h4>
+      <p>Look for "least variability ranking" = 1.0</p>
+    </div>
+    <div class="flow-step">
+      <div class="num">4</div>
+      <h4>Verify Score</h4>
+      <p>Confirm deviation score &lt; 1.0</p>
+    </div>
+    <div class="flow-step">
+      <div class="num">5</div>
+      <h4>Use Forecast</h4>
+      <p>Find matching rows in <span class="file-ref">pa_step_escalation_prediction</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: Deviation Score Guide -->
+<div class="section">
+  <h2 class="section-title">Deviation Score Interpretation</h2>
+  <div class="card">
+    <h3>What is the Deviation Score?</h3>
+    <p>The deviation score measures how far a part's annual escalation rate deviates from the population median, normalized by the Median Absolute Deviation (MAD). It is directly analogous to standard deviation but uses the median instead of the mean, making it <strong>robust to outliers</strong>.</p>
+    <div class="formula-box">
+      <span class="highlight">deviation</span> = |x − median| / (1.4826 × MAD)<br>
+      where MAD = median(|x<sub>i</sub> − median(x)|)
+    </div>
+    <p style="margin-top:0.5rem;font-size:0.85rem;color:var(--muted);">The 1.4826 scaling factor makes MAD equivalent to standard deviation for normally distributed data.</p>
+  </div>
+
+  <table class="score-table">
+    <thead>
+      <tr><th>Score</th><th>Category</th><th>Meaning</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-green">0.0</span></td>
+        <td>At median</td>
+        <td>Annual rate exactly equals the population median</td>
+        <td>Ideal — use this approach with confidence</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-green">&lt; 1.0</span></td>
+        <td>Normal</td>
+        <td>Within one MAD of the median</td>
+        <td>Good consistency — recommended for use</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-amber">1.0 – 3.0</span></td>
+        <td>Moderate</td>
+        <td>Noticeable deviation from median behavior</td>
+        <td>Acceptable, but review explainability file for weight distribution</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-red">3.0 – 5.0</span></td>
+        <td>High</td>
+        <td>Significant outlier behavior</td>
+        <td>Investigate historical data for anomalies or unusual PAs</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-red">&gt; 5.0</span></td>
+        <td>Extreme</td>
+        <td>Approach is producing highly atypical results</td>
+        <td>Do not use this approach for this part without manual review</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 3: File-by-File Guide -->
+<div class="section">
+  <h2 class="section-title">File-by-File Reading Guide</h2>
+  
+  <div class="grid-2">
+    <div class="card">
+      <h3>📊 Statistics File <span class="badge badge-blue">Decision Support</span></h3>
+      <p><span class="file-ref">wgt_avg_results_per_part</span></p>
+      <p style="margin:0.5rem 0;"><strong>Shape:</strong> 9 parts × 5 approaches = 45 rows</p>
+      <p><strong>Key columns to focus on:</strong></p>
+      <ul>
+        <li><strong>least variability ranking</strong> — Your primary decision column. Rank 1 = recommended.</li>
+        <li><strong>deviation score(median)</strong> — Confidence measure. Lower = better.</li>
+        <li><strong>annual_rate</strong> — Implied yearly price escalation (e.g., 0.09 = 9%/year).</li>
+        <li><strong>Average Value ($)</strong> — The weighted average unit price across all historical PAs.</li>
+        <li><strong>% of change last pa vs average</strong> — The step escalation rate used for forecasting.</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <h3>🔮 Estimation File <span class="badge badge-blue">Forecasts</span></h3>
+      <p><span class="file-ref">pa_step_escalation_prediction</span></p>
+      <p style="margin:0.5rem 0;"><strong>Shape:</strong> 92 rows (varies per part)</p>
+      <p><strong>Key columns to focus on:</strong></p>
+      <ul>
+        <li><strong>impact_purchase_cost</strong> — Projected cost for each future PA period.</li>
+        <li><strong>start_date / end_date</strong> — Coverage period of the projected PA.</li>
+        <li><strong>wgt_avg_approach</strong> — Which methodology generated this row.</li>
+        <li><strong>least variability ranking</strong> — Filter for = 1.0 to see recommended projections.</li>
+        <li><strong>step_duration(years)</strong> — Duration of each projected PA step.</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <h3>📁 Historical Data <span class="badge badge-blue">Foundation</span></h3>
+      <p><span class="file-ref">impact_pa_and_history_pa</span></p>
+      <p style="margin:0.5rem 0;"><strong>Shape:</strong> 32 rows across 9 parts</p>
+      <p><strong>When to reference:</strong></p>
+      <ul>
+        <li>Validating the quality and quantity of source data</li>
+        <li>Understanding why a part's results look unusual</li>
+        <li>Checking if a dominant PA is skewing results</li>
+        <li>Parts with only 2 PAs → Baseline becomes risky</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <h3>🔍 Explainability File <span class="badge badge-blue">Audit Trail</span></h3>
+      <p><span class="file-ref">weight_assigment_explainability</span></p>
+      <p style="margin:0.5rem 0;"><strong>Shape:</strong> 320 rows</p>
+      <p><strong>When to reference:</strong></p>
+      <ul>
+        <li>Stakeholder asks "why was this approach chosen?"</li>
+        <li>Understanding weight distribution per approach</li>
+        <li>Verifying that time-decay weights decrease for older PAs</li>
+        <li>Checking if one contract dominates the cost-weighted average</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: Decision Framework -->
+<div class="section">
+  <h2 class="section-title">Data-Driven Decision Framework</h2>
+  
+  <div class="decision-tree">
+    <h3 style="color:var(--navy);margin-bottom:0.8rem;">For each part number, follow this logic:</h3>
+    
+    <div class="dt-node green">
+      <strong>Step 1:</strong> Find the approach with <strong>least variability ranking = 1</strong>. Does the deviation score &lt; 1.0?
+      <br>→ <em>Yes:</em> Use this approach. It is statistically consistent and reliable.
+    </div>
+    
+    <div class="dt-node amber">
+      <strong>Step 2:</strong> Deviation score between 1.0 and 3.0?
+      <br>→ Open <span class="file-ref">weight_assigment_explainability</span> and check if one contract dominates weight_pct. If distribution looks reasonable, proceed with caution.
+    </div>
+    
+    <div class="dt-node red">
+      <strong>Step 3:</strong> Deviation score &gt; 3.0 for the rank-1 approach?
+      <br>→ Check <span class="file-ref">impact_pa_and_history_pa</span> for the part. Does it have &lt; 3 PAs? Are there extreme price jumps? Consider using the rank-2 approach or manual review.
+    </div>
+    
+    <div class="dt-node">
+      <strong>Step 4:</strong> Sensitivity check — Compare the <strong>impact_purchase_cost</strong> across all 5 approaches for the same future period.
+      <br>→ <em>Narrow range:</em> All approaches agree. Any choice is reasonable.
+      <br>→ <em>Wide range:</em> The choice of approach matters significantly. Rely on the ranking.
+    </div>
+    
+    <div class="dt-node green">
+      <strong>Step 5:</strong> Apply business context override (if applicable):
+      <br>→ Recent renegotiation? Favor Time Decay or Hybrid.
+      <br>→ Large strategic contract dominates? Cost-weighted may be appropriate.
+      <br>→ Stable commodity pricing? Equal weight provides an unbiased baseline.
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: Approach Selection Cheat Sheet -->
+<div class="section">
+  <h2 class="section-title">Approach Selection Cheat Sheet</h2>
+  <table class="score-table">
+    <thead>
+      <tr><th>Scenario</th><th>Recommended Approach</th><th>Why</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Stable pricing history, many PAs</td>
+        <td><strong>Equal Weight</strong></td>
+        <td>No need to bias toward recency or cost; all data is equally relevant</td>
+      </tr>
+      <tr>
+        <td>Recent price renegotiation</td>
+        <td><strong>Time Decay</strong></td>
+        <td>Recent contracts reflect current market conditions</td>
+      </tr>
+      <tr>
+        <td>One dominant large contract</td>
+        <td><strong>Cost Weighted</strong></td>
+        <td>Financial impact of the dominant contract should drive the forecast</td>
+      </tr>
+      <tr>
+        <td>Mix of old large and new small PAs</td>
+        <td><strong>Hybrid</strong></td>
+        <td>Balances financial magnitude with recency</td>
+      </tr>
+      <tr>
+        <td>Only 2 PAs available</td>
+        <td><strong>Equal (avoid Baseline)</strong></td>
+        <td>Baseline with 2 PAs is just a 2-point comparison with no averaging</td>
+      </tr>
+      <tr>
+        <td>Unknown / default</td>
+        <td><strong>Use ranking = 1</strong></td>
+        <td>Let the data-driven variability scoring decide</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Tips & Warnings -->
+<div class="section">
+  <h2 class="section-title">Tips and Warnings</h2>
+  <div class="grid-2">
+    <div>
+      <div class="tip-box">
+        <strong>💡 Tip:</strong>
+        <p>The <strong>annual_rate</strong> column is the single most intuitive metric. An annual_rate of 0.09 means the approach predicts ~9% yearly price escalation. Use this to communicate forecasts to non-technical stakeholders.</p>
+      </div>
+      <div class="tip-box">
+        <strong>💡 Tip:</strong>
+        <p>Deviation scores are <strong>not comparable across parts</strong>. A score of 0.5 for Part A and 0.5 for Part B may represent very different absolute deviations. Compare only within a part's 5 approaches.</p>
+      </div>
+      <div class="tip-box">
+        <strong>💡 Tip:</strong>
+        <p>The forecasted PAs in the estimation file are <strong>sorted by ranking</strong>. The first rows for each part always correspond to the recommended approach.</p>
+      </div>
+    </div>
+    <div>
+      <div class="warn-box">
+        <strong>⚠️ Warning:</strong>
+        <p>A low deviation score does <strong>not</strong> mean the forecasted price is the lowest. It means the escalation rate is the most <strong>statistically consistent</strong> with the population. The recommended approach may project higher costs than alternatives.</p>
+      </div>
+      <div class="warn-box">
+        <strong>⚠️ Warning:</strong>
+        <p>The Baseline approach uses only the last 2 PAs. For parts with <strong>fewer than 3 historical PAs</strong>, the Baseline result should be treated with extra skepticism. Extreme deviation scores (>5) for Baseline often indicate this issue.</p>
+      </div>
+      <div class="warn-box">
+        <strong>⚠️ Warning:</strong>
+        <p>When all approaches produce the same deviation score (often 0.674), this typically means the population MAD is very small and multiple annual rates map to similar deviations. In this case, prefer <strong>Hybrid or Time Decay</strong> for their balanced methodology.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
