@@ -1,0 +1,8 @@
+# ═══════════════════════════════════════════════
+# SageMaker Dependencies — Distributed GPU Training
+# ═══════════════════════════════════════════════
+# Install: pip install -r requirements-sagemaker.txt
+
+-r requirements.txt
+sagemaker>=2.200
+boto3>=1.34

@@ -1,0 +1,8 @@
+# ═══════════════════════════════════════════════
+# GPU Dependencies — Local GPU Training
+# ═══════════════════════════════════════════════
+# Install: pip install -r requirements-gpu.txt
+
+-r requirements.txt
+tensorflow[and-cuda]>=2.14,<2.18    # CUDA + cuDNN bundled
+tensorboard>=2.14
